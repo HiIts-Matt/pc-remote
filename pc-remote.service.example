@@ -1,0 +1,18 @@
+[Unit]
+Description=Remote control HTTP server for a PC (wake + shutdown)
+After=network.target tailscaled.service
+
+[Service]
+Type=simple
+User=your-user
+WorkingDirectory=/home/your-user/pc-remote
+ExecStart=/usr/bin/node /home/your-user/pc-remote/server.js
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/your-user/pc-remote
+
+[Install]
+WantedBy=multi-user.target

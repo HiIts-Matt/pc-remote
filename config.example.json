@@ -1,0 +1,7 @@
+{
+  "targetMac": "AA:BB:CC:DD:EE:FF",
+  "broadcastIp": "192.168.1.255",
+  "sshHost": "your-pc-hostname",
+  "sshUser": "your-ssh-user",
+  "sshKeyPath": "~/.ssh/id_ed25519_your-key"
+}
