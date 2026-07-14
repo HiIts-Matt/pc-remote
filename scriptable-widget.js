@@ -44,7 +44,15 @@ async function getToken() {
 async function fetchStatus(token) {
   const req = new Request(`${BASE_URL}/pc-status?token=${encodeURIComponent(token)}`);
   req.timeoutInterval = 8;
-  return await req.loadJSON();
+  const body = await req.loadString();
+  const statusCode = req.response.statusCode;
+  if (statusCode === 403) {
+    throw new Error("bad token");
+  }
+  if (statusCode !== 200) {
+    throw new Error(`http ${statusCode}`);
+  }
+  return JSON.parse(body);
 }
 
 function buildWidget(status, fetchError) {
@@ -74,7 +82,8 @@ function buildWidget(status, fetchError) {
   widget.addSpacer(4);
 
   if (fetchError) {
-    const errText = widget.addText(`can't reach Pi (${fetchError})`);
+    const message = fetchError === "bad token" ? "wrong token saved" : `can't reach Pi (${fetchError})`;
+    const errText = widget.addText(message);
     errText.font = Font.systemFont(10);
     errText.textColor = Color.red();
     errText.lineLimit = 2;
@@ -95,7 +104,7 @@ function buildWidget(status, fetchError) {
 }
 
 async function run() {
-  const token = await getToken();
+  let token = await getToken();
   let status = null;
   let fetchError = null;
 
@@ -105,7 +114,23 @@ async function run() {
     try {
       status = await fetchStatus(token);
     } catch (e) {
-      fetchError = "unreachable";
+      fetchError = e.message || "unreachable";
+    }
+  }
+
+  // If the saved token was wrong, offer to re-enter it right away instead of
+  // leaving a bad value stuck in Keychain (only possible when run manually -
+  // a widget refresh can't show an alert).
+  if (fetchError === "bad token" && !config.runsInWidget) {
+    Keychain.remove(KEYCHAIN_KEY);
+    token = await getToken();
+    if (token) {
+      try {
+        status = await fetchStatus(token);
+        fetchError = null;
+      } catch (e) {
+        fetchError = e.message || "unreachable";
+      }
     }
   }
 
