@@ -93,10 +93,15 @@ function buildWidget(status, fetchError) {
     errText.textColor = Color.red();
     errText.lineLimit = 2;
   } else if (status?.checkedAt) {
-    const ageSeconds = Math.round((Date.now() - status.checkedAt) / 1000);
-    const ageText = widget.addText(`checked ${ageSeconds}s ago`);
-    ageText.font = Font.systemFont(10);
-    ageText.textColor = Color.gray();
+    const checkedStack = widget.addStack();
+    checkedStack.centerAlignContent();
+    const label = checkedStack.addText("checked ");
+    label.font = Font.systemFont(10);
+    label.textColor = Color.gray();
+    const dateEl = checkedStack.addDate(new Date(status.checkedAt));
+    dateEl.applyRelativeStyle();
+    dateEl.font = Font.systemFont(10);
+    dateEl.textColor = Color.gray();
   }
 
   widget.refreshAfterDate = new Date(Date.now() + REFRESH_HINT_MINUTES * 60 * 1000);
