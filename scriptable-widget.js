@@ -14,11 +14,11 @@ const KEYCHAIN_KEY = "pc-remote-token";
 const REFRESH_HINT_MINUTES = 10;
 
 const STYLES = {
-  "ready": { color: "#34c759", label: "On", symbol: "power" },
-  "powered-off": { color: "#8e8e93", label: "Off", symbol: "power" },
-  "booting-up": { color: "#ff9f0a", label: "Booting up", symbol: "arrow.triangle.2.circlepath" },
-  "shutting-down": { color: "#ff9f0a", label: "Shutting down", symbol: "arrow.triangle.2.circlepath" },
-  "unknown": { color: "#8e8e93", label: "Unknown", symbol: "questionmark.circle" },
+  "ready": { color: "#34c759", label: "On" },
+  "powered-off": { color: "#8e8e93", label: "Off" },
+  "booting-up": { color: "#ff9f0a", label: "Booting up" },
+  "shutting-down": { color: "#ff9f0a", label: "Shutting down" },
+  "unknown": { color: "#8e8e93", label: "Unknown" },
 };
 
 async function getToken() {
@@ -58,28 +58,29 @@ async function fetchStatus(token) {
 function buildWidget(status, fetchError) {
   const widget = new ListWidget();
   widget.backgroundColor = Color.dynamic(Color.white(), Color.black());
+  widget.setPadding(16, 16, 16, 16);
 
   const style = STYLES[status?.state] ?? STYLES.unknown;
 
-  const header = widget.addStack();
-  header.centerAlignContent();
-  const icon = SFSymbol.named(style.symbol);
-  icon.applyFont(Font.systemFont(14));
-  const iconEl = header.addImage(icon.image);
-  iconEl.imageSize = new Size(14, 14);
-  iconEl.tintColor = new Color(style.color);
-  header.addSpacer(6);
-  const nameText = header.addText("matts-pc");
-  nameText.font = Font.mediumSystemFont(12);
+  const nameText = widget.addText("MATTS-PC");
+  nameText.font = Font.mediumSystemFont(11);
   nameText.textColor = Color.gray();
 
-  widget.addSpacer(8);
+  widget.addSpacer();
 
-  const stateText = widget.addText(style.label);
-  stateText.font = Font.boldSystemFont(20);
+  const stateStack = widget.addStack();
+  stateStack.centerAlignContent();
+  const dot = SFSymbol.named("circle.fill");
+  dot.applyFont(Font.systemFont(10));
+  const dotEl = stateStack.addImage(dot.image);
+  dotEl.imageSize = new Size(10, 10);
+  dotEl.tintColor = new Color(style.color);
+  stateStack.addSpacer(6);
+  const stateText = stateStack.addText(style.label);
+  stateText.font = Font.boldSystemFont(19);
   stateText.textColor = new Color(style.color);
 
-  widget.addSpacer(4);
+  widget.addSpacer();
 
   if (fetchError) {
     const message = fetchError === "bad token" ? "wrong token saved" : `can't reach Pi (${fetchError})`;
@@ -87,11 +88,13 @@ function buildWidget(status, fetchError) {
     errText.font = Font.systemFont(10);
     errText.textColor = Color.red();
     errText.lineLimit = 2;
+    errText.minimumScaleFactor = 0.7;
   } else if (status?.error) {
     const errText = widget.addText(status.error);
     errText.font = Font.systemFont(10);
     errText.textColor = Color.red();
     errText.lineLimit = 2;
+    errText.minimumScaleFactor = 0.7;
   } else if (status?.checkedAt) {
     const checkedStack = widget.addStack();
     checkedStack.centerAlignContent();
