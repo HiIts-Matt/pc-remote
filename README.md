@@ -11,9 +11,8 @@ stays a dumb controller/display.
   always-on Linux box on the same LAN as the target PC), bound to
   `127.0.0.1:8765` only.
 - [`tailscale serve`](https://tailscale.com/kb/1312/serve) proxies that local
-  port to an HTTPS URL reachable from anywhere on your tailnet — no port
-  forwarding, no public exposure. A shared token (`token.txt`, never
-  committed) is checked on every request as defense-in-depth on top of that.
+  port to an HTTPS URL reachable from anywhere on your tailnet without needing port forwarding
+  A shared token (`token.txt`, never committed) is checked on every request as defense-in-depth on top of that.
 - `GET /wake` sends a Wake-on-LAN magic packet, then polls the target's SSH
   port until it responds.
 - `GET /shutdown` SSHes into the target and runs a shutdown command, then
@@ -63,7 +62,7 @@ stays a dumb controller/display.
 1. Clone this repo onto the Pi, e.g. to `~/pc-remote`.
 
 2. **Generate an SSH keypair** dedicated to this (don't reuse an existing
-   one):
+   one). change 'yourpc' to the name of your pc for cleanliness:
    ```
    ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_yourpc -N ""
    ```
@@ -134,11 +133,11 @@ an iOS home-screen widget:
    `scriptable-widget.js`.
 2. Replace the `BASE_URL` placeholder at the top with your own tailnet URL
    from step 5 above.
-3. Run it once manually (not as a widget) — it'll prompt for your token and
+3. Run it once manually (not as a widget). it'll prompt for your token and
    store it in iOS Keychain.
 4. Add a Scriptable widget to your home screen and set its script to this one.
 
-It only ever reads the cached `/pc-status` — no live SSH/ping check happens
+It only ever reads the cached `/pc-status`. no live SSH/ping check happens
 on the phone, since widget refresh execution budgets are too tight for that
 and iOS's own refresh scheduling is opportunistic (typically every 15–70+
 minutes, not something you can force from outside).
