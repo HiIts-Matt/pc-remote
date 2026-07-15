@@ -99,13 +99,13 @@ function buildWidget(status, fetchError) {
   } else if (status?.checkedAt) {
     const checkedStack = widget.addStack();
     checkedStack.centerAlignContent();
-    const label = checkedStack.addText("checked ");
-    label.font = Font.systemFont(10);
-    label.textColor = Color.gray();
     const dateEl = checkedStack.addDate(new Date(status.checkedAt));
     dateEl.applyRelativeStyle();
     dateEl.font = Font.systemFont(10);
     dateEl.textColor = Color.gray();
+    const label = checkedStack.addText(" ago");
+    label.font = Font.systemFont(10);
+    label.textColor = Color.gray();
   }
 
   const transient = status?.state === "booting-up" || status?.state === "shutting-down";
