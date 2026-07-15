@@ -150,3 +150,15 @@ the response — if it's already the target state, it was a no-op, notify and
 stop. Otherwise poll `/pc-status` every few seconds until `state` is no
 longer `booting-up`/`shutting-down`, then notify based on the final state
 and `error` field.
+
+Right before that final notification, also add a Scriptable "Run Script"
+action targeting the widget script. That re-executes `scriptable-widget.js`
+in the background (Scriptable's action-extension context, not the widget
+context — the script detects this via `config.runsInActionExtension` and
+just refreshes the cached content, no UI) so the home screen widget updates
+immediately instead of waiting for its next opportunistic iOS refresh. The
+widget's own `refreshAfterDate` (shortened to 1 minute while
+`booting-up`/`shutting-down`, 10 minutes once settled) stays as a fallback
+for state changes that happen without the Shortcut running at all — e.g. the
+PC's power state changing some other way and only the Pi's idle poll
+catching it.

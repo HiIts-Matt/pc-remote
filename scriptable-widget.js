@@ -11,7 +11,8 @@
 
 const BASE_URL = "https://YOUR-TAILNET-HOSTNAME.ts.net"; // your Pi's tailnet address, from `tailscale serve status`
 const KEYCHAIN_KEY = "pc-remote-token";
-const REFRESH_HINT_MINUTES = 10;
+const REFRESH_HINT_MINUTES_STABLE = 10;
+const REFRESH_HINT_MINUTES_TRANSIENT = 1;
 
 const STYLES = {
   "ready": { color: "#34c759", label: "On" },
@@ -107,7 +108,9 @@ function buildWidget(status, fetchError) {
     dateEl.textColor = Color.gray();
   }
 
-  widget.refreshAfterDate = new Date(Date.now() + REFRESH_HINT_MINUTES * 60 * 1000);
+  const transient = status?.state === "booting-up" || status?.state === "shutting-down";
+  const refreshMinutes = transient ? REFRESH_HINT_MINUTES_TRANSIENT : REFRESH_HINT_MINUTES_STABLE;
+  widget.refreshAfterDate = new Date(Date.now() + refreshMinutes * 60 * 1000);
   return widget;
 }
 
@@ -128,8 +131,9 @@ async function run() {
 
   // If the saved token was wrong, offer to re-enter it right away instead of
   // leaving a bad value stuck in Keychain (only possible when run manually -
-  // a widget refresh can't show an alert).
-  if (fetchError === "bad token" && !config.runsInWidget) {
+  // a widget refresh or a background Shortcut trigger can't show an alert).
+  const runningHeadless = config.runsInWidget || config.runsInActionExtension;
+  if (fetchError === "bad token" && !runningHeadless) {
     Keychain.remove(KEYCHAIN_KEY);
     token = await getToken();
     if (token) {
@@ -144,7 +148,10 @@ async function run() {
 
   const widget = buildWidget(status, fetchError);
 
-  if (config.runsInWidget) {
+  if (runningHeadless) {
+    // Real widget re-render, or a Shortcut forcing one via the "Run Script"
+    // action right when it detects a state change - either way there's no
+    // screen to show a preview on, just push the fresh content.
     Script.setWidget(widget);
   } else {
     await widget.presentSmall();
