@@ -15,8 +15,8 @@ const REFRESH_HINT_MINUTES_STABLE = 10;
 const REFRESH_HINT_MINUTES_TRANSIENT = 1;
 
 const STYLES = {
-  "ready": { color: "#34c759", label: "On" },
-  "powered-off": { color: "#8e8e93", label: "Off" },
+  "ready": { color: "#34c759", label: "Online" },
+  "powered-off": { color: "#8e8e93", label: "Offline" },
   "booting-up": { color: "#ff9f0a", label: "Booting up" },
   "shutting-down": { color: "#ff9f0a", label: "Shutting down" },
   "unknown": { color: "#8e8e93", label: "Unknown" },
